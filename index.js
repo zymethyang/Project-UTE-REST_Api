@@ -50,12 +50,69 @@ app.post('/range/set', (req, res) => {
 })
 
 app.post('/range/get', (req, res) => {
-    const { minPh, maxPh, minEc, maxEc } = req.body;
+    const { type, time } = req.body;
     pool.getConnection()
         .then(conn => {
-            conn.query(`UPDATE setting SET min_ph=?,max_ph=?,min_ec=?,max_ec=?`, [minPh, maxPh, minEc, maxEc])
+            conn.query(`SELECT cast(updated_time as time) as label ,${type} as y FROM ec JOIN setting WHERE updated_time between '${time}' and '${time} 23:59:59' ORDER BY updated_time DESC`)
                 .then((rows) => {
-                    res.send({ status: true });
+                    res.send(rows);
+                    conn.end();
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.send({ status: false });
+                    conn.end();
+                })
+        }).catch(err => {
+            console.log(err);
+        });
+})
+
+app.post('/range/get/temp', (req, res) => {
+    const { time } = req.body;
+    pool.getConnection()
+        .then(conn => {
+            conn.query(`SELECT cast(updated_time as time) as label ,30 as y FROM ec JOIN setting WHERE updated_time between '${time}' and '${time} 23:59:59' ORDER BY updated_time DESC`)
+                .then((rows) => {
+                    res.send(rows);
+                    conn.end();
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.send({ status: false });
+                    conn.end();
+                })
+        }).catch(err => {
+            console.log(err);
+        });
+})
+
+app.post('/range/get/water/min', (req, res) => {
+    const { time } = req.body;
+    pool.getConnection()
+        .then(conn => {
+            conn.query(`SELECT cast(updated_time as time) as label ,80 as y FROM ec JOIN setting WHERE updated_time between '${time}' and '${time} 23:59:59' ORDER BY updated_time DESC`)
+                .then((rows) => {
+                    res.send(rows);
+                    conn.end();
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.send({ status: false });
+                    conn.end();
+                })
+        }).catch(err => {
+            console.log(err);
+        });
+})
+
+app.post('/range/get/water/max', (req, res) => {
+    const { time } = req.body;
+    pool.getConnection()
+        .then(conn => {
+            conn.query(`SELECT cast(updated_time as time) as label ,100 as y FROM ec JOIN setting WHERE updated_time between '${time}' and '${time} 23:59:59' ORDER BY updated_time DESC`)
+                .then((rows) => {
+                    res.send(rows);
                     conn.end();
                 })
                 .catch(err => {
